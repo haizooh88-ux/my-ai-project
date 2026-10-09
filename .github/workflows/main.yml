@@ -1,0 +1,37 @@
+
+name: Build BHH AI APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Unzip project
+        run: |
+          unzip -o BHH_AI_Gemini_Android_Starter.zip -d project
+          find project -name gradlew -exec chmod +x {} \;
+
+      - name: Build APK
+        run: |
+          cd project
+          DIR=$(find . -name gradlew -type f | head -n 1)
+          test -n "$DIR"
+          cd "$(dirname "$DIR")"
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BHH-AI-APK
+          path: project/**/*.apk
